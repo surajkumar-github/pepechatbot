@@ -3,9 +3,9 @@ from discord.ext import commands, tasks
 
 from random import choice
 
-client = commands.Bot(command_prefix='duck ')
+client = commands.Bot(command_prefix='pepe ')
 
-status = ['duck help', 'Learning!', 'Eating!', 'Sleeping!']
+status = ['pepe help', 'Learning!', 'Eating!', 'Sleeping!']
 queue = []
 
 @client.event
@@ -61,7 +61,13 @@ async def version(context):
 async def dinosaur_fact(ctx):
     responses = ['Dinosaurs are a group of reptiles that have lived on Earth for about 245 million years', 'In 1842, the English naturalist Sir Richard Owen coined the term Dinosauria, derived from the Greek deinos, meaning “fearfully great,” and sauros, meaning “lizard', 'Dinosaur fossils have been found on all seven continents', 'All non-avian dinosaurs went extinct about 66 million years ago', 'There are roughly 700 known species of extinct dinosaurs', 'Modern birds are a kind of dinosaur because they share a common ancestor with non-avian dinosaurs']
     async with ctx.typing():
-        await ctx.send(choice(responses)) 
+        await ctx.send(choice(responses))   
+
+@client.command(name='joke', help='**random jokes**')
+async def joke(ctx):
+    responses = ['https://media.discordapp.net/attachments/819534363728805918/834466102569467954/0eacbd797c15fb7bcc7d4a80c0ce84b0.png?width=437&height=436', 'https://media.discordapp.net/attachments/819534363728805918/834465387902664724/15935020215efae94530944.png?width=515&height=436', 'https://cdn.discordapp.com/attachments/819534363728805918/834469801879404584/7e871c31529b97e624a7fe5194e618f8.png', 'https://media.discordapp.net/attachments/819534363728805918/834469600892551189/1345553-scan0042.png?width=283&height=436', 'https://media.discordapp.net/attachments/819534363728805918/834470288069623838/rippedpants.png']
+    async with ctx.typing():
+        await ctx.send(choice(responses))
 
 # image commands
 

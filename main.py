@@ -3,9 +3,9 @@ from discord.ext import commands, tasks
 
 from random import choice
 
-client = commands.Bot(command_prefix='pepe ')
+client = commands.Bot(command_prefix='duck ')
 
-status = ['pepe help', 'Learning!', 'Eating!', 'Sleeping!']
+status = ['duck help', 'Learning!', 'Eating!', 'Sleeping!']
 queue = []
 
 @client.event
@@ -56,6 +56,12 @@ async def version(context):
     myEmbed.add_field(name="Date Released", value="```20th April 2021```", inline=False)
     myEmbed.set_footer(text="This Bot is created by SURAJ")
     await context.message.channel.send(embed=myEmbed)    
+
+@client.command(name='dinosaur_fact', help='**random dinosaur facts**')
+async def dinosaur_fact(ctx):
+    responses = ['Dinosaurs are a group of reptiles that have lived on Earth for about 245 million years', 'In 1842, the English naturalist Sir Richard Owen coined the term Dinosauria, derived from the Greek deinos, meaning “fearfully great,” and sauros, meaning “lizard', 'Dinosaur fossils have been found on all seven continents', 'All non-avian dinosaurs went extinct about 66 million years ago', 'There are roughly 700 known species of extinct dinosaurs', 'Modern birds are a kind of dinosaur because they share a common ancestor with non-avian dinosaurs']
+    async with ctx.typing():
+        await ctx.send(choice(responses)) 
 
 # image commands
 

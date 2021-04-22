@@ -98,6 +98,46 @@ async def bunny(context):
     myEmbed = discord.Embed(title="snow's cute bunny....", description="", colour=0x00ff00)
     myEmbed.set_image(url="https://cdn.discordapp.com/attachments/819534363728805918/834379897484476426/tenor_13.gif")
     await context.message.channel.send(embed=myEmbed)  
+# other commands
+
+@client.command()
+async def avatar(ctx, *,  avamember : discord.Member=None):
+    userAvatarUrl = avamember.avatar_url
+    await ctx.send(userAvatarUrl)
+
+@client.command() 
+async def add(ctx,a:int,b:int): 
+    await ctx.send(f"{a} + {b} = {a+b}") #Adds A and B
+
+@client.command() 
+async def sub(ctx,a:int,b:int): 
+    await ctx.send(f"{a} - {b} = {a-b}") #Subtracts A and B
+
+@client.command() 
+async def mul(ctx,a:int,b:int): 
+    await ctx.send(f"{a} * {b} = {a*b}") #Multplies A and B
+
+@client.command() 
+async def div(ctx,a:int,b:int): 
+    await ctx.send(f"{a} / {b} = {a/b}") #Divides A and B
+    
+@client.command()
+async def say(ctx, *, args):
+    async with ctx.typing():
+        await ctx.send(args)
+        await ctx.message.delete()
+    
+@client.command(pass_context=True)
+@commands.has_permissions(administrator=True)
+async def clean(ctx, limit: int):
+        await ctx.channel.purge(limit=limit)
+        await ctx.send('Cleared by {}'.format(ctx.author.mention))
+        await ctx.message.delete()
+
+@clean.error
+async def clear_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("You cant do that!")
 
 @tasks.loop(seconds=10)
 async def change_status():

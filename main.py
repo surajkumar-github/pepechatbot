@@ -341,7 +341,7 @@ async def hug(ctx,*, member : discord.Member=None):
 
     try: 
     # Search Endpoint
-        q="hug"
+        q="anime hug"
         api_response = api_instance.gifs_search_get(api_key, q, limit=50, rating='g')
         lst = list(api_response.data)
         giff = random.choice(lst)

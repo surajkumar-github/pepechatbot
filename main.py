@@ -1,12 +1,28 @@
+from itertools import filterfalse
 import discord
+from discord.client import Client
 from discord.ext import commands, tasks
-
+import giphy_client
+from giphy_client.rest import ApiException
+import random
 from random import choice
+from discord.ext.commands.core import command
+from discord.ext.commands import BucketType
+import os
+import httpx as requests
+import json
+import datetime
 
-client = commands.Bot(command_prefix='pepe ')
 
-status = ['pepe help', 'Learning!', 'Eating!', 'Sleeping!']
+client = commands.Bot(command_prefix=['pepe ', 'Pepe ', 'PEPE '], case_insensitive=True)
+client.remove_command('help')
+
+status = ['pepe help', 'v2 comming soon']
 queue = []
+
+@tasks.loop(seconds=10)
+async def change_status():
+    await client.change_presence(activity=discord.Game(choice(status)))
 
 @client.event
 async def on_ready():
@@ -129,18 +145,212 @@ async def say(ctx, *, args):
     
 @client.command(pass_context=True)
 @commands.has_permissions(administrator=True)
-async def clean(ctx, limit: int):
+async def purge(ctx, limit: int):
         await ctx.channel.purge(limit=limit)
         await ctx.send('Cleared by {}'.format(ctx.author.mention))
         await ctx.message.delete()
 
-@clean.error
-async def clear_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("You cant do that!")
+@client.command()
+async def membercount(ctx):
+    embed = discord.Embed(colour=discord.Colour.orange())
 
-@tasks.loop(seconds=10)
-async def change_status():
-    await client.change_presence(activity=discord.Game(choice(status)))
+    embed.set_author(name="Member Count", icon_url=ctx.guild.icon_url)
+    embed.add_field(name="Total", value=ctx.guild.member_count)
+    embed.set_footer(text=ctx.guild, icon_url=ctx.guild.icon_url)
+    embed.timestamp = datetime.datetime.utcnow()
+
+    await ctx.send(embed=embed)
+
+
+@client.command()
+async def av(ctx, *, member: discord.Member = None):
+    if not member:member=ctx.message.author
+
+    message = discord.Embed(title=str(member), color=discord.Colour.red())
+    message.set_image(url=member.avatar_url)
+
+    await ctx.send(embed=message)
+
+@client.command()
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member : discord.Member, *, reason=None):
+    await member.ban(reason=reason)
+    await ctx.send(f"{member} has been banned.")
+
+@client.command()
+async def fact(ctx):
+    start = "Did you know that "
+    facts = ["Banging your head against a wall for one hour burns 150 calories.",
+            "Snakes can help predict earthquakes.",
+            "7% of American adults believe that chocolate milk comes from brown cows.",
+            "If you lift a kangaroo’s tail off the ground it can’t hop.",
+            "Bananas are curved because they grow towards the sun.",
+            "Billy goats urinate on their own heads to smell more attractive to females.",
+            "The inventor of the Frisbee was cremated and made into a Frisbee after he died.",
+            "During your lifetime, you will produce enough saliva to fill two swimming pools.",
+            "Polar bears could eat as many as 86 penguins in a single sitting…",
+            "Heart attacks are more likely to happen on a Monday.",
+            "In 2017 more people were killed from injuries caused by taking a selfie than by shark attacks.",
+            "A lion’s roar can be heard from 5 miles away.",
+            "The United States Navy has started using Xbox controllers for their periscopes.",
+            "A sheep, a duck and a rooster were the first passengers in a hot air balloon.",
+            "The average male gets bored of a shopping trip after 26 minutes.",
+            "Recycling one glass jar saves enough energy to watch television for 3 hours.",
+            "Approximately 10-20% of U.S. power outages are caused by squirrels."
+        ]
+    fact_file = open("facts.txt", mode="r", encoding="utf8")
+    fact_file_facts = fact_file.read().split("\n")
+    fact_file.close()
+
+    for i in fact_file_facts:
+        if i == "": fact_file_facts.remove(i)
+
+    facts = facts + fact_file_facts
+
+    await ctx.send(start + random.choice(facts).lower())
+
+@client.command()
+@commands.cooldown(1, 10, BucketType.user)
+async def slap_member(ctx, member: discord.Member):
+        apikey = os.environ["3BMUFLN4ST6C"]
+        lmt = 20
+        search_term = "slap"
+        r = requests.get("https://api.tenor.com/v1/search?q={search_term}&key=${process.env.TENORKEY}&limit=20")
+
+        if r.status_code == 200:  
+            top_gifs = json.loads(r.content)
+            uri = random.choice(random.choice(top_gifs['results'])['media'])["gif"]["url"]
+
+        else:
+            embed = discord.Embed(title=f"The site was unable to be reached. Please try again later", colour=discord.Colour.blurple())
+            return await ctx.send(embed=embed)
+
+        embed = discord.Embed(title = f"{ctx.author.display_name} slapped {member.display_name}!", colour=discord.Colour.blurple())
+
+        embed.set_image(url=uri)
+        embed.set_footer(text="Powered by Tenor")
+        await ctx.send(embed=embed)
+
+@client.command()
+@commands.cooldown(1, 10, BucketType.user)
+async def hit_member(ctx, member: discord.Member):
+        apikey = ["3BMUFLN4ST6C"]
+        lmt = 20
+        search_term = "punch"
+        r = requests.get("https://api.tenor.com/v1/search?q=%s&key=%s&limit=%s" % (search_term, apikey, lmt))
+
+        if r.status_code == 200:
+            top_gifs = json.loads(r.content)
+            uri = random.choice(random.choice(top_gifs['results'])['media'])["gif"]["url"]
+
+        else:
+            embed = discord.Embed(title=f"The site was unable to be reached. Please try again later", colour=discord.Colour.blurple())
+            return await ctx.send(embed=embed)
+
+        embed = discord.Embed(title=f"{ctx.author.display_name} punched {member.display_name}!", colour=discord.Colour.blurple())
+
+        embed.set_image(url=uri)
+        embed.set_footer(text="Powered by Tenor")
+        await ctx.send(embed=embed)
+
+@client.command()
+async def gif(ctx,*,q="random"):
+
+    api_key="yLoJwv5SZw53kwXy6luYUi6UE81C77PH"
+    api_instance = giphy_client.DefaultApi()
+
+    try: 
+    # Search Endpoint
+        
+        api_response = api_instance.gifs_search_get(api_key, q, limit=50, rating='g')
+        lst = list(api_response.data)
+        giff = random.choice(lst)
+
+        emb = discord.Embed(title=q)
+        emb.set_image(url = f'https://media.giphy.com/media/{giff.id}/giphy.gif')
+
+        await ctx.channel.send(embed=emb)
+    except ApiException as e:
+        print("Exception when calling DefaultApi->gifs_search_get: %s\n" % e)
+
+@client.command()
+async def punch(ctx,*, member : discord.Member=None):
+
+    api_key="yLoJwv5SZw53kwXy6luYUi6UE81C77PH"
+    api_instance = giphy_client.DefaultApi()
+
+    try: 
+    # Search Endpoint
+        q="punch"
+        api_response = api_instance.gifs_search_get(api_key, q, limit=50, rating='g')
+        lst = list(api_response.data)
+        giff = random.choice(lst)
+
+        emb = discord.Embed(title=f"{ctx.author.display_name} punched {member.display_name}!", colour=discord.Colour.blurple())
+        emb.set_image(url = f'https://media.giphy.com/media/{giff.id}/giphy.gif')
+
+        await ctx.channel.send(embed=emb)
+    except ApiException as e:
+        print("Exception when calling DefaultApi->gifs_search_get: %s\n" % e)        
+
+@client.command()
+async def slap(ctx,*, member : discord.Member=None):
+
+    api_key="yLoJwv5SZw53kwXy6luYUi6UE81C77PH"
+    api_instance = giphy_client.DefaultApi()
+
+    try: 
+    # Search Endpoint
+        q="slap"
+        api_response = api_instance.gifs_search_get(api_key, q, limit=50, rating='g')
+        lst = list(api_response.data)
+        giff = random.choice(lst)
+
+        emb = discord.Embed(title=f"{ctx.author.display_name} slapped {member.display_name}!", colour=discord.Colour.blurple())
+        emb.set_image(url = f'https://media.giphy.com/media/{giff.id}/giphy.gif')
+
+        await ctx.channel.send(embed=emb)
+    except ApiException as e:
+        print("Exception when calling DefaultApi->gifs_search_get: %s\n" % e)          
+
+@client.command()
+async def kick(ctx,*, member : discord.Member=None):
+
+    api_key="yLoJwv5SZw53kwXy6luYUi6UE81C77PH"
+    api_instance = giphy_client.DefaultApi()
+
+    try: 
+    # Search Endpoint
+        q="kick"
+        api_response = api_instance.gifs_search_get(api_key, q, limit=50, rating='g')
+        lst = list(api_response.data)
+        giff = random.choice(lst)
+
+        emb = discord.Embed(title=f"{ctx.author.display_name} kicked {member.display_name}!", colour=discord.Colour.blurple())
+        emb.set_image(url = f'https://media.giphy.com/media/{giff.id}/giphy.gif')
+
+        await ctx.channel.send(embed=emb)
+    except ApiException as e:
+        print("Exception when calling DefaultApi->gifs_search_get: %s\n" % e)  
+
+@client.command()
+async def hug(ctx,*, member : discord.Member=None):
+
+    api_key="yLoJwv5SZw53kwXy6luYUi6UE81C77PH"
+    api_instance = giphy_client.DefaultApi()
+
+    try: 
+    # Search Endpoint
+        q="hug"
+        api_response = api_instance.gifs_search_get(api_key, q, limit=50, rating='g')
+        lst = list(api_response.data)
+        giff = random.choice(lst)
+
+        emb = discord.Embed(title=f"{ctx.author.display_name} hugged {member.display_name}!", colour=discord.Colour.blurple())
+        emb.set_image(url = f'https://media.giphy.com/media/{giff.id}/giphy.gif')
+
+        await ctx.channel.send(embed=emb)
+    except ApiException as e:
+        print("Exception when calling DefaultApi->gifs_search_get: %s\n" % e)  
 
 client.run('ODMzNzMzMDgxMTQzMDUwMjkw.YH2ocA.I64_-wmBUzNAAKLm3M7ssxHgDuw')
